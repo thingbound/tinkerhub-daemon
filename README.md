@@ -1,13 +1,14 @@
 # tinkerhub-daemon
 
-````
+```
 $ npm install -g tinkerhub-daemon
 ```
 
-Start the daemon:
+Start and stop the daemon:
 
 ```
 $ tinkerhubd start
+$ tinkerhubd stop
 ```
 
 Install plugins:
