@@ -1,6 +1,6 @@
 'use strict';
 
-const { Thing, Storage } = require('abstract-things');
+const { Thing } = require('abstract-things');
 
 const th = require('tinkerhub');
 const os = require('os');
@@ -9,8 +9,10 @@ const path = require('path');
 const forever = require('forever-monitor');
 
 const Plugins = require('./plugins');
+const storage = require('./storage');
+const id = require('./id');
 
-class Daemon extends Thing.with(Storage) {
+class Daemon extends Thing {
 
 	static get type() {
 		return 'daemon';
@@ -32,11 +34,10 @@ class Daemon extends Thing.with(Storage) {
 	constructor(packages) {
 		super();
 
-		this.id = 'th:daemon';
 		this.metadata.name = os.hostname();
 
 		this._monitors = new Map();
-		this._plugins = new Plugins(this.storage, packages);
+		this._plugins = new Plugins(storage, packages);
 
 		process.on('SIGTERM', () => {
 			this.stopAll()
@@ -46,6 +47,8 @@ class Daemon extends Thing.with(Storage) {
 
 	init() {
 		return super.init()
+			.then(() => id())
+			.then(id => this.id = 'daemon:' + id)
 			.then(() => this._plugins.init())
 			.then(() => {
 				for(const p of this._plugins.list()) {
@@ -90,7 +93,6 @@ class Daemon extends Thing.with(Storage) {
 
 	stopAll() {
 		const promises = [];
-		console.log(this._monitors.keys());
 		for(const [ key, monitor ] of this._monitors) {
 			if(monitor.running && monitor.child) {
 				promises.push(new Promise(resolve => {
@@ -104,7 +106,6 @@ class Daemon extends Thing.with(Storage) {
 				}));
 			}
 		}
-		console.log(promises);
 		return Promise.all(promises);
 	}
 }
