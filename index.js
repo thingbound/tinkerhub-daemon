@@ -1,18 +1,17 @@
 'use strict';
 
 const { Thing } = require('abstract-things');
+const MachineDetails = require('tinkerhub/machine-details');
 
 const th = require('tinkerhub');
-const os = require('os');
 const path = require('path');
 
 const forever = require('forever-monitor');
 
 const Plugins = require('./plugins');
 const storage = require('./storage');
-const id = require('./id');
 
-class Daemon extends Thing {
+class Daemon extends Thing.with(MachineDetails) {
 
 	static get type() {
 		return 'daemon';
@@ -34,7 +33,8 @@ class Daemon extends Thing {
 	constructor(packages) {
 		super();
 
-		this.metadata.name = os.hostname();
+		this.id = 'daemon';
+		this.metadata.name = 'Tinkerhub Daemon';
 
 		this._monitors = new Map();
 		this._plugins = new Plugins(storage, packages);
@@ -47,8 +47,6 @@ class Daemon extends Thing {
 
 	init() {
 		return super.init()
-			.then(() => id())
-			.then(id => this.id = 'daemon:' + id)
 			.then(() => this._plugins.init())
 			.then(() => {
 				for(const p of this._plugins.list()) {

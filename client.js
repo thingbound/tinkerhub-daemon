@@ -2,11 +2,8 @@
 
 const th = require('tinkerhub/endpoint');
 
-const storage = require('./storage');
-const id = require('./id');
-
 module.exports = function() {
-	return id()
+	return th.machineId()
 		.then(id => {
 			const c = th.get('daemon:' + id);
 

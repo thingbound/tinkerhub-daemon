@@ -2,7 +2,6 @@
 
 const npm = require('global-npm');
 const path = require('path');
-const fs = require('fs');
 
 module.exports = class Plugins {
 	constructor(storage, path) {
